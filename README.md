@@ -21,7 +21,7 @@ end
 ```
 
 ```
-$ COUNT_CALLS='String#split' ruby test.rb
+$ COUNT_CALLS_TO='String#split' ruby test.rb
 ...
 String#split called 100 times
 ```
@@ -91,19 +91,19 @@ regarding performance:
    added overhead.
 
    The degree to which this affects your program's performance in practice will
-   depend heavily on how hot your instrumented method is. That is,
-   instrumentation of a hot method called in a tight loop many times during your
+   depend heavily on how hot your instrumented method is.
+   Instrumentation of a method called in a tight loop many times during your
    program's execution will be more expensive overall than instrumentation of a
    method only called a few times during the life of your program.
 
 The benchmark in `spec/snail_spec.rb` (run with `bundle exec rake test BENCH=1`)
-attempts to measure the amount of overhead incurred by instrumentation of a
-method with Snail. The benchmark compares times to call empty instrumented and
+attempts to measure the overhead incurred by instrumentation of a method with
+Snail. The benchmark compares times to call empty instrumented and
 uninstrumented methods (both class and instance methods).
 
 When interpreting the results, keep in mind that most methods worth
 instrumenting are not empty -- that is, they do some non-trivial work that will
-help amortize per-call overhead.
+help amortize the per-call overhead.
 
 Benchmark results will vary from machine to machine (and between different Ruby
 implementations), but on the author's machine, the overhead introduced by 
