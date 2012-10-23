@@ -157,17 +157,17 @@ describe Snail do
       5.times { Dummy5.foo }
       p.calls.must_equal(5)
     end
-  end
 
-  it 'should work with nested modules' do
-    p = Snail.instrument('Dummies::Dummy6.foo')
+    it 'should work with nested modules' do
+      p = Snail.instrument('Dummies::Dummy6.foo')
 
-    module Dummies
-      module Dummy6; def self.foo; end; end
+      module Dummies
+        module Dummy6; def self.foo; end; end
+      end
+
+      5.times { Dummies::Dummy6.foo }
+      p.calls.must_equal(5)
     end
-
-    5.times { Dummies::Dummy6.foo }
-    p.calls.must_equal(5)
   end
 
   it 'should work if method is added to class after instrumentation' do
@@ -179,6 +179,14 @@ describe Snail do
 
     3.times { Dummy7.new.foo }
     p.calls.must_equal(3)
+  end
+
+  it 'should work for dynamically-created classes' do
+    p = Snail.instrument('Dummy8.foo')
+
+    eval "class Dummy8; def self.foo; end; end; 5.times { Dummy8.foo }"
+
+    p.calls.must_equal(5)
   end
 
   if ENV['BENCH']
