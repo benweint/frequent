@@ -144,6 +144,10 @@ probably possible to break or trick it in many ways.
 This won't work, and should probably raise an exception, but currently just
 fails.
 
+## License
+
+MIT license. See LICENSE for details.
+
 ## Author
 
 Ben Weintraub - benweint@gmail.com
