@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(%r{^(spec)/})
-  gem.name          = "snail"
+  gem.name          = "frequent"
   gem.require_paths = ["lib"]
   gem.version       = '0.1'
 

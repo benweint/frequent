@@ -1,12 +1,12 @@
-module Snail
+module Frequent
   VERSION = 0.1
 
   ProbeNameError = Class.new(StandardError)
 
   def self.instrument(name)
-    probe = Snail::Probe.new(name)
+    probe = Frequent::Probe.new(name)
     probes[name] = probe
-    Snail::Deferred.enable! unless probe.enabled?
+    Frequent::Deferred.enable! unless probe.enabled?
     if block_given?
       yield
       probe.disable!
@@ -32,7 +32,7 @@ module Snail
   end
 end
 
-module Snail
+module Frequent
   class Probe
     attr_reader :name, :calls, :class_name, :method_name, :original_implementation
     alias_method :to_s, :name
@@ -58,7 +58,7 @@ module Snail
     end
 
     def method_owner
-      owner = Snail.constantize(class_name)
+      owner = Frequent.constantize(class_name)
       return unless owner
       @type == :instance ? owner : owner.singleton_class
     end
@@ -100,7 +100,7 @@ module Snail
     end
 
     def aliased_name
-      "__snail_original_#{method_name}".to_sym
+      "__frequent_original_#{method_name}".to_sym
     end
 
     def parse_name(name)
@@ -114,10 +114,10 @@ module Snail
   end
 end
 
-module Snail
+module Frequent
   module Deferred
     def self.place_by_name(name)
-      p = Snail.probes[name]
+      p = Frequent.probes[name]
       p.enable! if p && p.ready?
     end
 
@@ -125,15 +125,15 @@ module Snail
       return if @enabled
       ::Module.class_eval do
         def method_added(m)
-          Snail::Deferred.place_by_name("#{self}##{m}")
+          Frequent::Deferred.place_by_name("#{self}##{m}")
         end
 
         def singleton_method_added(m)
-          Snail::Deferred.place_by_name("#{self}.#{m}")
+          Frequent::Deferred.place_by_name("#{self}.#{m}")
         end
 
         def included(host)
-          Snail.probes.values.select(&:ready?).each(&:enable!)
+          Frequent.probes.values.select(&:ready?).each(&:enable!)
         end
       end
       @enabled = true
@@ -142,6 +142,6 @@ module Snail
 end
 
 if ENV['COUNT_CALLS_TO']
-  probe = Snail.instrument(ENV['COUNT_CALLS_TO'])
+  probe = Frequent.instrument(ENV['COUNT_CALLS_TO'])
   at_exit { puts "#{probe} called #{probe.calls} times" }
 end

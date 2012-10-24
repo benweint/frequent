@@ -1,22 +1,20 @@
-# Snail
+# Frequent
 
-Snails leave a slime trail behind them - a semi-permanent record of where
-they've been and what they've done. In a similar vein, Snail is a little Ruby
-metaprogramming demo gem that can keep track of what's happening during your
-Ruby program's execution - specifically, how many times a targeted method is
-called. 
+Frequent is a little Ruby metaprogramming demo gem that can keep track of what's
+happening during your Ruby program's execution - specifically, how many times a
+targeted method is called.
 
 ## Usage
 
-To use Snail, install the gem, then `require 'snail'` in one of your source
+To use frequent, install the gem, then `require 'frequent'` in one of your source
 files and set the `COUNT_CALLS_TO` environment variable to the name of the
 method you'd like to count calls to. Like this:
 
 ```
-require 'snail'
+require 'frequent'
 
 100.times do
-  puts "hello, snail".split(',').inspect
+  puts "hello, frequent".split(',').inspect
 end
 ```
 
@@ -32,10 +30,10 @@ Following Ruby conventions, instance methods are identified with a hash
 
 ### API
 
-You can also use the `Snail` module to manually place probes in your code:
+You can also use the `Frequent` module to manually place probes in your code:
 
 ```
-probe = Snail.instrument('MyClass#instance_method')
+probe = Frequent.instrument('MyClass#instance_method')
 ...
 probe.calls # number of calls to target since instrumentation
 ```
@@ -45,7 +43,7 @@ code's execution, you can pass a block to `instrument`, during which
 instrumentation will be enabled:
 
 ```
-probe = Snail.instrument('MyClass.method') do
+probe = Frequent.instrument('MyClass.method') do
   ...
 end
 probe.calls # number of calls to target that happened in the block
@@ -57,7 +55,7 @@ performance implementations of instrumenting not-yet-defined targets.
 
 ## Internals
 
-Snail works by overwriting the original implementation of the targeted method
+Frequent works by overwriting the original implementation of the targeted method
 with an instrumented version that keeps a call count, using Ruby's `class_eval`,
 `alias_method`, and `define_method` facilities. The original version of the
 instrumented method is saved so that it can be optionally restored after
@@ -65,19 +63,19 @@ instrumentation.
 
 ## Performance
 
-Snail is relatively low-overhead, but there are a few things to keep in mind
+Frequent is relatively low-overhead, but there are a few things to keep in mind
 regarding performance:
 
 1. You'll get better performance if you place your probes *after* your target
-   method has been defined. Snail will attempt to place your probe immediately
-   upon calls to `Snail.instrument`, but if it ever encounters a probe that it
+   method has been defined. Frequent will attempt to place your probe immediately
+   upon calls to `Frequent.instrument`, but if it ever encounters a probe that it
    cannot place yet due to a missing host class/module or method, it will make
    use of the `method_added`, `singleton_method_added`, and `included` hooks in
    Ruby.
 
    These hooks will cause a bit of code to execute each time a new method is
    added to a Ruby module in your process, and each time a module is included
-   in a new class. Snail uses these hooks so that it has a chance to place
+   in a new class. Frequent uses these hooks so that it has a chance to place
    instrumentation as soon as your targeted class/module and method become
    available.
 
@@ -96,9 +94,9 @@ regarding performance:
    program's execution will be more expensive overall than instrumentation of a
    method only called a few times during the life of your program.
 
-The benchmark in `spec/snail_spec.rb` (run with `bundle exec rake test BENCH=1`)
+The benchmark in `spec/frequent_spec.rb` (run with `bundle exec rake test BENCH=1`)
 attempts to measure the overhead incurred by instrumentation of a method with
-Snail. The benchmark compares times to call empty instrumented and
+Frequent. The benchmark compares times to call empty instrumented and
 uninstrumented methods (both class and instance methods).
 
 When interpreting the results, keep in mind that most methods worth
@@ -117,7 +115,7 @@ instance method is being instrumented).
 
 In Ruby, it's fairly common to encounter methods that aren't explicitly defined,
 but are instead dynamically implemented using Ruby's `method_missing` facility.
-Snail will not work for methods defined in this way.
+Frequent will not work for methods defined in this way.
 
 The main challenge in dealing with methods defined through `method_missing` is
 knowing when to place instrumentation. In order for instrumentation of
@@ -137,7 +135,7 @@ dynamically-created classes).
 
 ### Metaprogramming
 
-Snail isn't magic - it relies on the same hooks and facilities that are made
+Frequent isn't magic - it relies on the same hooks and facilities that are made
 available by the Ruby interpreter to any code in your program. That means it's
 probably possible to break or trick it in many ways.
 

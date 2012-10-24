@@ -1,4 +1,4 @@
-require 'snail'
+require 'frequent'
 
 require 'benchmark'
 require 'minitest/autorun'
