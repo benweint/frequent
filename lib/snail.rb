@@ -6,10 +6,10 @@ module Snail
   def self.instrument(name)
     probe = Snail::Probe.new(name)
     probes[name] = probe
-    Snail::Deferred.enable unless probe.placed?
+    Snail::Deferred.enable! unless probe.enabled?
     if block_given?
       yield
-      probe.uninstrument
+      probe.disable!
       probes.delete(name)
     end
     probe
@@ -34,24 +34,27 @@ end
 
 module Snail
   class Probe
-    attr_reader :name, :calls, :placed, :class_name, :method_name, :original_implementation
-    alias_method :placed?, :placed
+    attr_reader :name, :calls, :class_name, :method_name, :original_implementation
     alias_method :to_s, :name
 
     def initialize(name)
       @calls = 0
       @name = name
-      @placed = false
+      @enabled = false
       parse_name(name)
-      instrument if placeable?
+      enable! if ready?
     end
 
     def increment
       @calls += 1
     end
 
-    def placeable?
-      !placed? && method_owner && target_defined?
+    def enabled?
+      @enabled
+    end
+
+    def ready?
+      !enabled? && target_defined?
     end
 
     def method_owner
@@ -61,16 +64,16 @@ module Snail
     end
 
     def target_defined?
-      o = method_owner
-      (
-        o.method_defined?(method_name) ||
-        o.private_instance_methods.include?(method_name)
+      owner = method_owner
+      owner && (
+        owner.method_defined?(method_name) ||
+        owner.private_instance_methods.include?(method_name)
       )
     end
 
-    def instrument
-      unless @instrumenting
-        @instrumenting = true
+    def enable!
+      unless @enabling
+        @enabling = true
         @original_implementation = method_owner.instance_method(method_name)
         probe = self
         aliased_name = self.aliased_name
@@ -81,13 +84,13 @@ module Snail
             send(aliased_name, *args, &blk)
           end
         end
-        @placed = true
-        @instrumenting = false
+        @enabled = true
+        @enabling = false
       end
     end
 
-    def uninstrument
-      if placed?
+    def disable!
+      if enabled?
         probe = self
         method_owner.class_eval do
           define_method(probe.method_name, probe.original_implementation)
@@ -115,10 +118,10 @@ module Snail
   module Deferred
     def self.place_by_name(name)
       p = Snail.probes[name]
-      p.instrument if p && p.placeable?
+      p.enable! if p && p.ready?
     end
 
-    def self.enable
+    def self.enable!
       return if @enabled
       ::Module.class_eval do
         def method_added(m)
@@ -130,7 +133,7 @@ module Snail
         end
 
         def included(host)
-          Snail.probes.values.select(&:placeable?).each(&:instrument)
+          Snail.probes.values.select(&:ready?).each(&:enable!)
         end
       end
       @enabled = true

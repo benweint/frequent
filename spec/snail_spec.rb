@@ -102,7 +102,7 @@ describe Snail do
     it 'should remove probes on instance methods' do
       p = Snail.instrument('Potato#instance_method')
       Potato.new.instance_method
-      p.uninstrument
+      p.disable!
       Potato.new.instance_method
       p.calls.must_equal(1)
     end
@@ -110,7 +110,7 @@ describe Snail do
     it 'should remove probes on class methods' do
       p = Snail.instrument('Potato.class_method')
       Potato.class_method
-      p.uninstrument
+      p.disable!
       Potato.class_method
       p.calls.must_equal(1)
     end
