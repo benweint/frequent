@@ -4,6 +4,11 @@ Frequent is a little Ruby metaprogramming demo gem that can keep track of what's
 happening during your Ruby program's execution - specifically, how many times a
 targeted method is called.
 
+## Requirements
+
+You'll need Ruby 1.9 to use Frequent. The author has tested thus far only on MRI
+1.9.2 and 1.9.3.
+
 ## Usage
 
 To use frequent, install the gem, then `require 'frequent'` in one of your source
