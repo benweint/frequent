@@ -145,3 +145,7 @@ probably possible to break or trick it in many ways.
 
 This won't work, and should probably raise an exception, but currently just
 fails.
+
+## Author
+
+Ben Weintraub - benweint@gmail.com
